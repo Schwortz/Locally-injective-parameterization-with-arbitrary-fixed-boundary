@@ -20,7 +20,7 @@ void main()
 	myfile.open ("out.txt");
 	myfile >> numOfPoints;
 
-	int* rArray = new int [ numOfPoints ];
+	std::vector<int> rArray(numOfPoints);
 	int r;
 
 	for (int i=0; i<numOfPoints; ++i)
@@ -43,7 +43,7 @@ void main()
     std::streambuf *coutbuf = std::cout.rdbuf(); //save old buf
 	std::cout.rdbuf(out.rdbuf()); //redirect std::cout to out.txt!
 
-	for ( int i = 0 ; i < shor.triangulated.size() ; ++i )
+	for ( int i = 0 , len = (int)shor.triangulated.size(); i < len ; ++i )
 	{
 		std::cout  << shor.triangulated[i][0][0] << " " << shor.triangulated[i][0][1] <<std::endl;
 
@@ -54,7 +54,6 @@ void main()
 	}
 
 	
-	delete[] rArray;
 	//system("pause");
 
 }

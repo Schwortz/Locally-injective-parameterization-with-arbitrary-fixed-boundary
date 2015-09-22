@@ -2,52 +2,31 @@
 #include "stdafx.h"
 
 Shor::Shor()
+	:
+		N(0)	
 {
-	this->N = 0;
-	this->Q = NULL;
-	this->K = NULL;
-	this->firstAng = NULL;
-	this->lastAng = NULL;
-	this->rArray = NULL;
 }
 
 Shor::~Shor()
 {
-	if ( this -> N == 0 )
-		return;
-
-	for ( int i = 0 ; i < N ; ++i )
-	{
-		delete []Q[i];
-		delete []K[i];
-		delete []firstAng[i];
-		delete []lastAng[i];
-	}
-	delete []Q;
-	delete []K;
-	delete []firstAng;
-	delete []lastAng;
-
-	if ( rArray != NULL )
-		delete []rArray;
 }
 
-void Shor::load_polygon( Polygon_2 poly )
+void Shor::load_polygon( Polygon_2 newPoly )
 {
-	this -> poly = poly ;
-	this -> N = poly.size();
+	poly = newPoly ;
+	N = poly.size();
 
-	Q = new int*[N];
-	K = new int*[N];
-	firstAng = new Angle*[N];
-	lastAng = new Angle*[N];
+	Q.resize(N);
+	K.resize(N);
+	firstAng.resize(N);
+	lastAng.resize(N);
 
 	for ( int i = 0 ; i < N ; ++i )
 	{
-		Q[i] = new int[N]();
-		K[i] = new int[N]();
-		firstAng[i] = new Angle[N];
-		lastAng[i] = new Angle[N];
+		Q[i].resize(N);
+		K[i].resize(N);
+		firstAng[i].resize(N);
+		lastAng[i].resize(N);
 	}
 
 	for ( int i = 0 ; i < N ; ++i )
@@ -55,9 +34,12 @@ void Shor::load_polygon( Polygon_2 poly )
 			K[i][j] = -1;
 }
 
-void Shor::load_rArray ( int *arr )
+void Shor::load_rArray ( std::vector<int>& arr )
 {
-	rArray = new int [ N ];
+	rArray.clear();
+	if ( rArray.size() != N )
+		rArray.resize(N);
+
 	for ( int i = 0; i<N ; i++ )
 		rArray[i] = arr[i];
 }
@@ -235,7 +217,7 @@ void swap( int &a , int&b )
 	b = temp;
 }
 
-bool final_check_helper ( int *arr )
+bool final_check_helper ( std::vector<int>& arr )
 {
 	arr[2] = -1;
 	if ( arr[0] > arr[1] )
@@ -246,7 +228,7 @@ bool final_check_helper ( int *arr )
 			return false;
 }
 
-bool final_check ( bool f1 , bool f2, bool f3, int *arr )
+bool final_check ( bool f1 , bool f2, bool f3, std::vector<int>& arr )
 {
 	if (!f1)
 		arr[0] = -1;
@@ -270,7 +252,7 @@ bool final_check ( bool f1 , bool f2, bool f3, int *arr )
 	return (false);
 }
 
-void Shor::sort_and_check( int *arr , Polygon_2 &res_poly , int* temp )
+void Shor::sort_and_check( std::vector<int>& arr, Polygon_2 &res_poly ,  std::vector<int>& temp )
 {
 	temp[0]=arr[0];
 	temp[1]=arr[1];
@@ -294,7 +276,7 @@ void Shor::sort_and_check( int *arr , Polygon_2 &res_poly , int* temp )
 		f3 = true;
 	}
 
-	for ( int i = 0; i<res_poly.size(); i++ )
+	for ( int i = 0, len = (int)res_poly.size(); i< len; i++ )
 	{
 		if (check1)
 			if ( (!f1)&&( poly[ arr [0] ] == res_poly[i] ) )
@@ -388,7 +370,8 @@ void unite( std::vector<Polygon_2> &simple_list )
 	int i,j;	//i - new_p , j - old_p
 	int count = 0;
 
-	while ( count < simple_list.size()-1 )
+	int len = (int)simple_list.size()-1;
+	while ( count < len )
 	{
 		p_old = simple_list[count];
 		oSize = p_old.size();
@@ -436,10 +419,10 @@ void unite( std::vector<Polygon_2> &simple_list )
 
 }
 
-void check_for_simple( std::vector<Polygon_2> &simple_list , Polygon_2 &res_poly, int* tri, bool& flag )
+void check_for_simple( std::vector<Polygon_2> &simple_list , Polygon_2 &res_poly, std::vector<int>& tri, bool& flag )
 {
 	Polygon_2 poly1,poly2;
-	int i,j;
+	int j;
 	
 	if ( ( tri[0] == -1 ) || ( tri[1] == -1 ) )
 		return;
@@ -487,12 +470,12 @@ void check_for_simple( std::vector<Polygon_2> &simple_list , Polygon_2 &res_poly
 
 void Shor::simplify_triangulation()
 {
-	if ( !this->isTriangultae )
+	if ( !isTriangultae )
 		return;
 	std::vector<Polygon_2> simple_list;
 	Polygon_2 res_poly = poly;
-	int counter = 0 , j,hope;
-	int tri[3],original_indices[3];
+	int counter = 0 ,hope;
+	std::vector<int> tri(3),original_indices(3);
 	bool flag, inside_flag=true;
 	if ( poly.is_simple() )				//check if the original input is simple
 	{
@@ -575,11 +558,11 @@ void Shor::simplify_triangulation()
 
 	//std::cout  << simple_list.size() <<std::endl;
 
-	for ( int i = 0 ; i < simple_list.size() ; ++i )
+	for ( int i = 0 , len = (int)simple_list.size(); i < len ; ++i )
 	{
 		//std::cout  << simple_list[i].size() <<std::endl;
 
-		for (int j = 0 ; j < simple_list[i].size() ; j++ )
+		for (int j = 0 , innerLen = (int)simple_list[i].size(); j < innerLen ; j++ )
 		{
 			std::cout  << simple_list[i][j][0] << " " << simple_list[i][j][1] <<std::endl;
 
@@ -602,7 +585,7 @@ void Shor::simplify_triangulation()
 	std::vector<std::pair<int, std::complex<double> > > boundaryVertices;
 	double maxTriangleArea = 0.01;
 
-	for ( int i = 0 ; i < simple_list[0].size() ; i++ )
+	for ( int i = 0 , len = (int)simple_list[0].size() ; i < len ; i++ )
 	{
 		polygonPoints.push_back ( std::complex<double> ( simple_list[0][i][0] , simple_list[0][i][1] ) );
 		boundaryVertices.push_back ( std::pair<int,std::complex<double>> ( i , polygonPoints[i] ) );
